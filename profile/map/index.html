@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Map – Peace For You Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-lg fixed w-full z-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="/" class="text-2xl font-bold text-blue-600">🕊️ Peace For You Network</a>
+                <div class="hidden md:flex space-x-8">
+                    <a href="/" class="text-gray-700 hover:text-blue-600">Home</a>
+                    <a href="/write/" class="text-gray-700 hover:text-blue-600">Share</a>
+                    <a href="/read/" class="text-gray-700 hover:text-blue-600">Read</a>
+                    <a href="/map/" class="text-blue-600 font-semibold">Global Map</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-24 pb-12 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-4">Global Voices Map 🌍</h1>
+            <p class="text-center text-gray-600 mb-8">See stories of peace from around the world</p>
+            <div id="map" style="height: 600px;" class="rounded-lg shadow-lg mb-8"></div>
+            
+            <!-- Stats -->
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                <p class="text-lg"><span id="storyCount" class="font-bold text-blue-600">0</span> stories from <span id="countryCount" class="font-bold text-green-600">0</span> countries</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Country coordinates (simplified)
+        const coords = {
+            'US': [37.09, -95.71], 'GB': [55.38, -3.44], 'IN': [20.59, 78.96],
+            'NG': [9.08, 8.68], 'BR': [-14.23, -51.93], 'JP': [36.20, 138.25],
+            'KE': [-1.29, 36.82], 'ZA': [-30.56, 22.94], 'EG': [26.82, 30.80],
+            'MX': [23.63, -102.55], 'CA': [56.13, -106.35], 'AU': [-25.27, 133.78],
+            'FR': [46.23, 2.21], 'DE': [51.16, 10.45], 'IT': [41.87, 12.57],
+            'ES': [40.46, -3.75], 'RU': [61.52, 105.32], 'CN': [35.86, 104.19]
+        };
+
+        // Load stories
+        const content = JSON.parse(localStorage.getItem('peace_content') || '[]');
+        const countries = new Set();
+        
+        content.forEach(item => {
+            const country = item.author?.country;
+            if (country && coords[country]) {
+                countries.add(country);
+                L.marker(coords[country]).addTo(map)
+                    .bindPopup(`
+                        <b>${item.title || 'A Peace Message'}</b><br>
+                        From: ${item.author?.name || 'Anonymous'}<br>
+                        Type: ${item.type}<br>
+                        "${(item.content || '').substring(0, 100)}..."
+                    `);
+            }
+        });
+
+        // Update stats
+        document.getElementById('storyCount').textContent = content.length;
+        document.getElementById('countryCount').textContent = countries.size;
+    </script>
+</body>
+</html>
